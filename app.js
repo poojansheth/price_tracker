@@ -52,12 +52,27 @@ async function fetchQuotes() {
         container.innerHTML = '';
 
         data.forEach(item => {
+            const friendlyName = tickerMapping[item.symbol] || item.shortName || item.symbol;
+
             if (item.error) {
-                console.error(item.error);
+                const card = document.createElement('div');
+                card.className = 'card error-card';
+                card.style.borderColor = '#fa4549';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <h2 class="symbol-name">${friendlyName}</h2>
+                        <span class="symbol-ticker">${item.symbol}</span>
+                    </div>
+                    <div class="price-container">
+                        <p class="price-change down" style="font-size: 0.9rem;">
+                            ${item.error}
+                        </p>
+                    </div>
+                `;
+                container.appendChild(card);
                 return;
             }
 
-            const friendlyName = tickerMapping[item.symbol] || item.shortName || item.symbol;
             const changeData = formatChange(item.change, item.changePercent);
 
             const card = document.createElement('div');

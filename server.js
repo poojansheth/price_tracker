@@ -29,7 +29,7 @@ app.get('/api/quotes', async (req, res) => {
                 };
             } catch (err) {
                 console.error(`Error fetching data for ${symbol}:`, err);
-                return { symbol: symbol, error: "Failed to fetch data" };
+                return { symbol: symbol, error: `Failed: ${err.message}` };
             }
         }));
         res.json(results);
