@@ -1,4 +1,4 @@
-const CACHE_NAME = 'finance-dash-v3';
+const CACHE_NAME = 'finance-dash-v4';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',

@@ -3,6 +3,11 @@ const cors = require('cors');
 const yahooFinanceModule = require('yahoo-finance2').default;
 const yahooFinance = new yahooFinanceModule();
 
+let quoteCache = {
+    data: null,
+    lastUpdated: 0
+};
+
 
 
 const app = express();
@@ -14,6 +19,14 @@ app.use(express.static('.')); // Serve static files from current directory
 app.get('/api/quotes', async (req, res) => {
     const defaultSymbols = ['GC=F', 'SI=F', 'GBPUSD=X', 'NATP.L', 'SMGB.L', 'EQQQ.L', 'GOOG', 'PLTR', 'NVDA'];
     let symbols = req.query.symbols ? req.query.symbols.split(',') : defaultSymbols;
+
+    // cache logic for default symbols
+    if (!req.query.symbols && quoteCache.data && (Date.now() - quoteCache.lastUpdated < 15 * 60 * 1000)) {
+        console.log('Serving from cache');
+        return res.json(quoteCache.data);
+    }
+
+    console.log('Fetching new data from Yahoo Finance');
 
     try {
         const results = await Promise.all(symbols.map(async (symbol) => {
@@ -32,6 +45,12 @@ app.get('/api/quotes', async (req, res) => {
                 return { symbol: symbol, error: `Failed: ${err.message}` };
             }
         }));
+
+        if (!req.query.symbols) {
+            quoteCache.data = results;
+            quoteCache.lastUpdated = Date.now();
+        }
+
         res.json(results);
     } catch (error) {
         console.error("Global error fetching quotes:", error);
